@@ -36,14 +36,6 @@ class Document:
                 section.clear()
 
         for line in lines:
-            match = LEVEL_A.match(line)
-            if match:
-                push_section()
-                lev_a += 1
-                lev_b = 0
-                lev_c = 0
-                section.append(line)
-                continue
 
             match = LEVEL_B.match(line)
             if match:
@@ -56,6 +48,15 @@ class Document:
             if match:
                 lev_c += 1
                 section.append(line.replace(r'\bullet', f'{lev_a}.{lev_b}.{lev_c}.'))
+                continue
+
+            match = LEVEL_A.match(line)
+            if match:
+                push_section()
+                lev_a += 1
+                lev_b = 0
+                lev_c = 0
+                section.append(line)
                 continue
 
             self.sections.append(line)
@@ -87,6 +88,14 @@ r'''{\rtf1\ansi\deff0{\fonttbl{\f0 \fnil ;}{\f1 Courier;}}
 {\pard \ql \f0 \sa0 \li720 \fi-360 2.1. \emspace  Some child item\sa180\sa180\par}'''
                 )
         
+    def test_prescedence(self):
+        with open('test-cases/Marketplace-buyers.md') as test_file:
+            document = Document(test_file.read())
+        
+        with open('test-cases/Marketplace-buyers-expected-ordering.rtf') as expected_ordering:
+            self.assertTrue(expected_ordering.read() in document.output)
+            
+
 
 
 if __name__== '__main__':
